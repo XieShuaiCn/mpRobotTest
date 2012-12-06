@@ -10,7 +10,7 @@ class UserCache
     
     private function __construct($user)
     {
-        $this->fileName = $this->cachePath . DIRECTORY_SEPARATOR . sha1($user);
+        $this->fileName = $this->cachePath . DIRECTORY_SEPARATOR . $user;
         if (file_exists($this->fileName))
         {
             $this->data = json_decode(file_get_contents($this->fileName), true);
