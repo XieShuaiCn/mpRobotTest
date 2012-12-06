@@ -94,9 +94,10 @@ class Reply
             $retTextArr[] = "";
             for ($i=0; $i<count($data["results"]); $i++)
             {
-                if ($i >= 15)
+                if ($i >= 12)
                 {
-                    $retTextArr[] .= "... 太长了..只能略... 具体可以看链接,不过腾讯的中转服务器DNS经常出问题~";
+                    $retTextArr[] .= "  ... 太长了..只能略... 具体可以看链接,不过腾讯的中转服务器DNS经常出问题~";
+                    break;
                 }
                 
                 $retTextArr[] = "  - " . $data["results"][$i]["name"];
