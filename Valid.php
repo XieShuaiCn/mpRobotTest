@@ -10,9 +10,9 @@ class Valid
      * @param string $token
      * @return boolean
      */
-    public function valid($signature, $timestamp, $nonce, $token)
+    public static function check($signature, $timestamp, $nonce, $token)
     {
-        $signatureCode = $this->getSignature($timestamp, $nonce, $token);
+        $signatureCode = self::getSignature($timestamp, $nonce, $token);
         if ($signatureCode == $signature) {
             return true;
         } else {
@@ -28,7 +28,7 @@ class Valid
      * @param string $token
      * @return string
      */
-    private function getSignature($timestamp, $nonce, $token)
+    private static function getSignature($timestamp, $nonce, $token)
     {
         $tmpArr = array($token, $timestamp, $nonce);
         sort($tmpArr);

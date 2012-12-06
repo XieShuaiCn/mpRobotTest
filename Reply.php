@@ -1,8 +1,20 @@
 <?php
 
+require_once("PlaceQuery.php");
+require_once("UserCache.php");
+
 class Reply
 {
     private $myUserName = "";
+    /**
+     * @var PlaceQuery 
+     */
+    private $placeQuery = null;
+    
+    public function __construct()
+    {
+        $this->placeQuery = PlaceQuery::getSigleton();
+    }
     
     
     public function responseMsg($content)
@@ -11,7 +23,7 @@ class Reply
         $retText = "";
         if (!empty($content)) 
         {
-            $reqObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $reqObj = simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
             $msgType = strtolower($reqObj->MsgType);
             $this->myUserName = $reqObj->ToUserName;
             $toUserName = $reqObj->FromUserName;
@@ -47,15 +59,49 @@ class Reply
     private function replyTextType(SimpleXMLElement $reqObj, $toUserName)
     {
         $msgContent = $reqObj->Content;
-        return $this->buildTextData($toUserName, "文本消息待实现！");
+        UserCache::simpleAddTalk($toUserName, $msgContent);
+        return $this->buildTextData($toUserName, "您的查询关键词, 请输入您的位置, 获取相关查询.");
     }
     
     
-    private function replyLocationType(SimpleXMLElement $reqObj, $toUserName)
+    private function replyLocationType(SimpleXMLElement $reqObj, $toUserName, $query="")
     {
         $lat = (float)$reqObj->Location_X;
-        $lon = (float)$reqObj->Location_Y;
-        // 实现逻辑
+        $lng = (float)$reqObj->Location_Y;
+        $label = $reqObj->Label;
+        $scale = (int)$reqObj->Scale;       // 缩放大小
+        $query = UserCache::simpleGetLastTalk($toUserName);
+        
+        if ($query)
+        {
+            // 实现逻辑
+            $results = $this->placeQuery->getResults($lat, $lng, $query);
+            /**
+                {
+                     "name":"中国工商银行五四大街支行",
+                     "location":{
+                         "lat":39.930678,
+                         "lng":116.409793
+                     },
+                     "address":"北京市东城区五四大街33号一层",
+                     "telephone":"(010)64043201",
+                     "uid":"026dcbfe3b02ce4a6c20b93c",
+                     "tag":"银行,王府井/东单",
+                     "detail_url":"http://api.map.baidu.com/place/detail?uid=026dcbfe3b02ce4a6c20b93c&output=html&source=placeapi"
+                 },
+             */
+            $retTextArr = array();;
+            for ($i=0; $i<count($results); $i++)
+            {
+                $retTextArr[] = $results[$i]["name"] . $results[$i]["address"] . "\r\n";
+            }
+            $retText = implode("\r\n", $retTextArr);
+            return $this->buildTextData($toUserName, $retText);
+        }
+        else
+        {
+            return $this->buildTextData($toUserName, "请给我一条文本消息作为查询关键词!");
+        }
     }
     
     
@@ -87,6 +133,7 @@ class Reply
         $this->createTextNode($dom, $root, "CreateTime", time());
         $this->createTextNode($dom, $root, "MsgType", "text");
         $this->createTextNode($dom, $root, "Content", $content);
+        $this->createTextNode($dom, $root, "FuncFlag", "0");
         
         return $dom->saveXML();
     }
