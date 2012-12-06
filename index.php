@@ -2,6 +2,7 @@
 
 require_once("define.php");
 require_once("Reply.php");
+require_once("Valid.php");
 
 if ($_GET)
 {
