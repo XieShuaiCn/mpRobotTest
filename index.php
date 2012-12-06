@@ -1,8 +1,8 @@
 <?php
 
 require_once("define.php");
-require_once("Reply.php");
-require_once("Valid.php");
+require_once("lib" . DIRECTORY_SEPARATOR . "Reply.php");
+require_once("lib" . DIRECTORY_SEPARATOR . "Valid.php");
 
 if ($_GET)
 {

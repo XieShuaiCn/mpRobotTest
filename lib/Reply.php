@@ -74,7 +74,7 @@ class Reply
         if ($query)
         {
             // 实现逻辑
-            $results = $this->placeQuery->getResults($lat, $lng, $query);
+            $data = $this->placeQuery->getResults($lat, $lng, $query);
             /**
                 {
                      "name":"中国工商银行五四大街支行",
@@ -89,11 +89,16 @@ class Reply
                      "detail_url":"http://api.map.baidu.com/place/detail?uid=026dcbfe3b02ce4a6c20b93c&output=html&source=placeapi"
                  },
              */
-            $retTextArr = array();;
-            for ($i=0; $i<count($results); $i++)
+            $retTextArr = array();
+            $retTextArr[] = "{$query} 本次搜索共找到 " . count($results) . " 个结果";
+            $retTextArr[] = "";
+            for ($i=0; $i<count($data["results"]); $i++)
             {
-                $retTextArr[] = $results[$i]["name"] . " : " . $results[$i]["address"] . "\r\n";
+                $retTextArr[] = "  - " . $data["results"][$i]["name"];
             }
+            $retTextArr[] = "";
+            // link
+            $retTextArr[] = "http://113.11.199.202/test/mpRobotTest/MAP{$data["nameKey"]}";
             $retText = implode("\r\n", $retTextArr);
             return $this->buildTextData($toUserName, $retText);
         }

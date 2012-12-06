@@ -1,6 +1,6 @@
 <?php
 require_once("define.php");
-require_once("MapResult.php");
+require_once("lib" . DIRECTORY_SEPARATOR . "MapResult.php");
 $content = "";
 if (isset($_GET["key"]) && $_GET["key"])
 {
@@ -14,8 +14,6 @@ if (isset($_GET["key"]) && $_GET["key"])
         <meta charset="UTF-8" />
         <style type="text/css">
             * {
-                margin:0; 
-                padding:0;
                 color:#333333;
             }
             body {

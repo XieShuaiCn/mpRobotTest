@@ -34,7 +34,7 @@ class MapResult
         $tlat = self::formatNum($tlat);
         $tlng = self::formatNum($tlng);
         $imgUrl = "http://api.map.baidu.com/staticimage?center={$llng},{$llat}&width=400&height=400&zoom=14";
-        $imgUrl .= "&markers={$llng},{$llat}|{$tlng},{$tlat}&markerStyles=m,,#0000FF|m,,#FF0000";
+        $imgUrl .= "&markers={$llng},{$llat}|{$tlng},{$tlat}&markerStyles=m,S,teal|m,T,fuchsia";
         return $imgUrl;
     }
     
@@ -49,19 +49,13 @@ class MapResult
             $lat = $data["lat"];
             $lng = $data["lng"];
             $queryStr = $data["query"];
-            $textArr[] = "### " . $queryStr;
-            $textArr[] = "    ";
-            $textArr[] = "    ";
-            $textArr[] = "    ";
-            $textArr[] = "    ";
-            $textArr[] = "    ";
+            $textArr[] = "# " . $queryStr;
+            $textArr[] = "* * *";
             for ($i=0; $i<count($data["LIST"]); $i++)
             {
-                $textArr[] = "#### " . $data["LIST"][$i]["name"];
+                $textArr[] = "### " . $data["LIST"][$i]["name"];
+                $textArr[] = "##### " . $data["LIST"][$i]["address"];
                 $textArr[] = "![{$data["LIST"][$i]["name"]}](" . self::getImgUrl($lat, $lng, $data["LIST"][$i]["location"]["lat"], $data["LIST"][$i]["location"]["lng"]) . ")";
-                $textArr[] = "    ";
-                $textArr[] = "    ";
-                $textArr[] = "    ";
             }
             $text =  implode("\r\n", $textArr);
         }

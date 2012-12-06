@@ -49,9 +49,8 @@ class PlaceQuery
     }
     
     
-    private function getCache($lat, $lng, $query)
+    private function getCache($fileName)
     {
-        $fileName = $this->getFileName($lat, $lng, $query);
         if (file_exists($fileName))
         {
             $saveData = unserialize(file_get_contents($fileName));
@@ -63,8 +62,13 @@ class PlaceQuery
     
     public function getResults($lat, $lng, $query="")
     {
-        $results = $this->getCache($lat, $lng, $query);
-        if ($results === null)
+        $fileName = $this->getFileName($lat, $lng, $query);
+        $returnArr = array(
+            "nameKey" => $fileName,
+            "results" => array(),
+        );
+        $returnArr["results"] = $this->getCache($fileName);
+        if ($returnArr["results"] === null)
         {
             // http://api.map.baidu.com/place/search?&query=关键字&bounds=查询区域&output=输出格式类型&key=用户密钥     : lat,lng(左下角坐标),lat,lng(右上角坐标)
             // 计算范围
@@ -79,22 +83,22 @@ class PlaceQuery
             $resultObj = json_decode($resultTxt, true);
             if (isset($resultObj["results"]) && is_array($resultObj["results"]))
             {
-                $results = $resultObj["results"];
+                $returnArr["results"] = $resultObj["results"];
             }
             else
             {
-                $results = array();
+                $returnArr["results"] = array();
             }
             $saveData = array(
                 "lat" => $lat,
                 "lng" => $lng,
                 "bounds" => $bounds,
                 "query" => $query,
-                "LIST" => $results,
+                "LIST" => $returnArr["results"],
                 "responseText" => $resultTxt,
             );
-            file_put_contents($this->getFileName($lat, $lng, $query), serialize($saveData));
+            file_put_contents($fileName, serialize($saveData));
         }
-        return $results;
+        return $returnArr;
     }
 }
