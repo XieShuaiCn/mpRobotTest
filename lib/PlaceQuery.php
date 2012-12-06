@@ -64,8 +64,8 @@ class PlaceQuery
     {
         $fileName = $this->getFileName($lat, $lng, $query);
         $returnArr = array(
-            "nameKey" => $fileName,
-            "results" => array(),
+            "nameKey" => basename($fileName)
+,            "results" => array(),
         );
         $returnArr["results"] = $this->getCache($fileName);
         if ($returnArr["results"] === null)
