@@ -108,7 +108,7 @@ class Reply
     private function createTextNode(DOMDocument $dom, DOMNode $parentNode, $name, $content)
     {
         $theNode = $dom->createElement($name);
-        $textNode = $dom->createTextNode($content);
+        $textNode = $dom->createCDATASection($content);
         $theNode->appendChild($textNode);
         $parentNode->appendChild($theNode);
     }

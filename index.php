@@ -16,9 +16,7 @@ if ($_GET)
     }
 }
 
-
-$postData = null;
-if ($_POST)
+if (isset($GLOBALS["HTTP_RAW_POST_DATA"]))
 {
     $postData = $GLOBALS["HTTP_RAW_POST_DATA"];
 }
