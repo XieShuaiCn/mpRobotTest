@@ -58,9 +58,9 @@ class Reply
     
     private function replyTextType(SimpleXMLElement $reqObj, $toUserName)
     {
-        $msgContent = (string)$reqObj->Content;
+        $msgContent = strip_tags((string)$reqObj->Content);
         UserCache::simpleAddTalk($toUserName, $msgContent);
-        return $this->buildTextData($toUserName, "您的查询关键词, 请输入您的位置, 获取相关查询.");
+        return $this->buildTextData($toUserName, "您查询的关键词为:{$msgContent},请输入地址信息,返回结果.");
     }
     
     
