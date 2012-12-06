@@ -54,7 +54,8 @@ class PlaceQuery
         $fileName = $this->getFileName($lat, $lng, $query);
         if (file_exists($fileName))
         {
-            return unserialize(file_get_contents($fileName));
+            $saveData = unserialize(file_get_contents($fileName));
+            return $saveData["LIST"];
         }
         return null;
     }
@@ -84,7 +85,14 @@ class PlaceQuery
             {
                 $results = array();
             }
-            file_put_contents($this->getFileName($lat, $lng, $query), serialize($results));
+            $saveData = array(
+                "lat" => $lat,
+                "lng" => $lng,
+                "bounds" => $bounds,
+                "query" => $query,
+                "LIST" => $results,
+            );
+            file_put_contents($this->getFileName($lat, $lng, $query), serialize($saveData));
         }
         return $results;
     }
