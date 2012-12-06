@@ -90,10 +90,15 @@ class Reply
                  },
              */
             $retTextArr = array();
-            $retTextArr[] = "{$query} 本次搜索共找到 " . count($results) . " 个结果";
+            $retTextArr[] = "{$query} 本次搜索共找到 " . count($data["results"]) . " 个结果";
             $retTextArr[] = "";
             for ($i=0; $i<count($data["results"]); $i++)
             {
+                if ($i >= 15)
+                {
+                    $retTextArr[] .= "... 太长了..只能略... 具体可以看链接,不过腾讯的中转服务器DNS经常出问题~";
+                }
+                
                 $retTextArr[] = "  - " . $data["results"][$i]["name"];
             }
             $retTextArr[] = "";
