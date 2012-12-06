@@ -91,6 +91,7 @@ class PlaceQuery
                 "bounds" => $bounds,
                 "query" => $query,
                 "LIST" => $results,
+                "responseText" => $resultTxt,
             );
             file_put_contents($this->getFileName($lat, $lng, $query), serialize($saveData));
         }
