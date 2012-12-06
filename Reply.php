@@ -92,7 +92,7 @@ class Reply
             $retTextArr = array();;
             for ($i=0; $i<count($results); $i++)
             {
-                $retTextArr[] = $results[$i]["name"] . $results[$i]["address"] . "\r\n";
+                $retTextArr[] = $results[$i]["name"] . " : " . $results[$i]["address"] . "\r\n";
             }
             $retText = implode("\r\n", $retTextArr);
             return $this->buildTextData($toUserName, $retText);
