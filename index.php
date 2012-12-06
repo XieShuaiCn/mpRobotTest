@@ -40,7 +40,7 @@ else if (isset($_GET["trying"]))
 //        <FromUserName><![CDATA[fromUser]]></FromUserName>
 //        <CreateTime>1348831860</CreateTime>
 //        <MsgType><![CDATA[text]]></MsgType>
-//        <Content><![CDATA[this is a test]]></Content>
+//        <Content>便利店</Content>
 //    </xml> 
 //";
 }
