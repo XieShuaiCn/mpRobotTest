@@ -24,9 +24,9 @@ class Reply
         if (!empty($content)) 
         {
             $reqObj = simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
-            $msgType = strtolower($reqObj->MsgType);
-            $this->myUserName = $reqObj->ToUserName;
-            $toUserName = $reqObj->FromUserName;
+            $msgType = strtolower((string)$reqObj->MsgType);
+            $this->myUserName = (string)$reqObj->ToUserName;
+            $toUserName = (string)$reqObj->FromUserName;
             if ($msgType == "text")
             {
                 return $this->replyTextType($reqObj, $toUserName);
@@ -51,14 +51,14 @@ class Reply
     
     private function replyImageType(SimpleXMLElement $reqObj, $toUserName)
     {
-        $picUrl = $reqObj->PicUrl;
-        return $this->buildTextData($toUserName, "图片不能识别！！");
+        $picUrl = (string)$reqObj->PicUrl;
+        return $this->buildTextData($toUserName, "图片不能识别！！ {$picUrl}");
     }
     
     
     private function replyTextType(SimpleXMLElement $reqObj, $toUserName)
     {
-        $msgContent = $reqObj->Content;
+        $msgContent = (string)$reqObj->Content;
         UserCache::simpleAddTalk($toUserName, $msgContent);
         return $this->buildTextData($toUserName, "您的查询关键词, 请输入您的位置, 获取相关查询.");
     }
@@ -68,10 +68,10 @@ class Reply
     {
         $lat = (float)$reqObj->Location_X;
         $lng = (float)$reqObj->Location_Y;
-        $label = $reqObj->Label;
+        $label = (string)$reqObj->Label;
         $scale = (int)$reqObj->Scale;       // 缩放大小
         $query = UserCache::simpleGetLastTalk($toUserName);
-        $query = "便利店";
+        echo $query; exit();
         if ($query)
         {
             // 实现逻辑
