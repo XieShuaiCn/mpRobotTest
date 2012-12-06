@@ -71,7 +71,6 @@ class Reply
         $label = (string)$reqObj->Label;
         $scale = (int)$reqObj->Scale;       // 缩放大小
         $query = UserCache::simpleGetLastTalk($toUserName);
-        echo $query; exit();
         if ($query)
         {
             // 实现逻辑
