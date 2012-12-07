@@ -1,36 +1,34 @@
 <?php
+require_once("DBAct.php");
 
 class UserCache
 {
-    private $cachePath = USER_CACHE_PATH;
-    private $fileName = "";
-    private $data = array(
-        "talkList" => array(),                  // 谈话信息, 时间,内容 
-    );
+    private $tableName = "UserCache";
+    private $userKey = "";
     
-    private function __construct($user)
+    private function __construct($userKey)
     {
-        $this->fileName = $this->cachePath . DIRECTORY_SEPARATOR . $user;
-        if (file_exists($this->fileName))
-        {
-            $this->data = json_decode(file_get_contents($this->fileName), true);
-        }
+        $this->userKey = $userKey;
     }
     
     
     private function addTalk($content)
     {
-        $this->data["talkList"][] = array(date("Y-m-d H:i:s"), $content);
-        file_put_contents($this->fileName, json_encode($this->data));
+        $content = DBAct::escapeString($content);
+        $nowStr = date("Y-m-d H:i:s");
+        $sqlStr = "INSERT INTO {$this->tableName}(UserKey, QueryStr, QueryTime)
+                        VALUES('{$this->userKey}', '{$content}', '{$nowStr}')";
+        return DBAct::execute($sqlStr);
     }
     
     
     private function getLastTalk()
     {
-        if (count($this->data["talkList"]) > 0)
+        $sqlStr = "SELECT QueryStr FROM {$this->tableName} WHERE UserKey='{$this->userKey}' ORDER BY ID DESC LIMIT 1";
+        $results = DBAct::getOne($sqlStr);
+        if ($results)
         {
-            $index = count($this->data["talkList"]) - 1;
-            return $this->data["talkList"][$index][1];
+            return $results["QueryStr"];
         }
         return "";
     }

@@ -1,6 +1,6 @@
 <?php
 
-require_once("PlaceQuery.php");
+require_once("SoSoPlaceQuery.php");
 require_once("UserCache.php");
 
 class Reply
@@ -13,7 +13,7 @@ class Reply
     
     public function __construct()
     {
-        $this->placeQuery = PlaceQuery::getSigleton();
+        $this->placeQuery = new SoSoPlaceQuery();
     }
     
     
@@ -69,42 +69,29 @@ class Reply
         $lat = (float)$reqObj->Location_X;
         $lng = (float)$reqObj->Location_Y;
         $label = (string)$reqObj->Label;
-        $scale = (int)$reqObj->Scale;       // 缩放大小
+        //$scale = (int)$reqObj->Scale;       // 缩放大小
         $query = UserCache::simpleGetLastTalk($toUserName);
         if ($query)
         {
             // 实现逻辑
-            $data = $this->placeQuery->getResults($lat, $lng, $query);
-            /**
-                {
-                     "name":"中国工商银行五四大街支行",
-                     "location":{
-                         "lat":39.930678,
-                         "lng":116.409793
-                     },
-                     "address":"北京市东城区五四大街33号一层",
-                     "telephone":"(010)64043201",
-                     "uid":"026dcbfe3b02ce4a6c20b93c",
-                     "tag":"银行,王府井/东单",
-                     "detail_url":"http://api.map.baidu.com/place/detail?uid=026dcbfe3b02ce4a6c20b93c&output=html&source=placeapi"
-                 },
-             */
+            $data = $this->placeQuery->getResults($lat, $lng, $query, $label);
+            $iKey = $this->placeQuery->getInverseKey($lat, $lng, $query);
             $retTextArr = array();
-            $retTextArr[] = "{$query} 本次搜索共找到 " . count($data["results"]) . " 个结果";
+            $retTextArr[] = "{$query} 本次搜索共找到 " . count($data) . " 个结果";
             $retTextArr[] = "";
-            for ($i=0; $i<count($data["results"]); $i++)
+            for ($i=0; $i<count($data); $i++)
             {
                 if ($i >= 12)
                 {
-                    $retTextArr[] .= "  ... 太长了..只能略... 具体可以看链接,不过腾讯的中转服务器DNS经常出问题~";
                     break;
                 }
                 
-                $retTextArr[] = "  - " . $data["results"][$i]["name"];
+                $retTextArr[] = "  - {$data[$i]["name"]}  ({$data[$i]["distance"]}m)";
             }
             $retTextArr[] = "";
+            $retTextArr[] .= "  ** 列出的是直线距离, 现只能计算直线距离...";
             // link
-            $retTextArr[] = "http://113.11.199.202/test/mpRobotTest/MAP{$data["nameKey"]}";
+            $retTextArr[] = "http://113.11.199.202/test/mpRobotTest/MAP{$iKey}";
             $retText = implode("\r\n", $retTextArr);
             return $this->buildTextData($toUserName, $retText);
         }

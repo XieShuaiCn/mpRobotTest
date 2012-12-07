@@ -1,0 +1,29 @@
+Baidu : 
+    # Doc -- http://openapi.baidu.com/map/place-api.htm
+    http://api.map.baidu.com/place/search?&query=关键字&bounds=查询区域&output=输出格式类型&key=用户密钥
+    需要KEY, 限次1000/天
+
+Soso :
+    http://api.map.qq.com/?b=116.44004334,39.936273,116.35421264,39.896775&l=11&wd=%E9%85%92%E5%BA%97&pn=0&rn=5&c=%E5%8C%97%E4%BA%AC%E5%B8%82&qt=poi&output=jsonp&fr=mapapi&cb=cbhaeminru&t=1354842961621
+        b : bound
+        l : 未知
+        pn : page number
+        rn : result number  每页结果数量
+        c : 中心城市
+        qt : poi
+        output : jsonp
+        fr : mapapi
+        cb : cbhaeminru     好像是返回的变量名
+        t : 1354842961621   当前查询毫秒
+    返回的是JS脚本
+
+Sogou :  (搜索效果有点弱啊.. 感觉, 老是没结果!)
+    # Doc -- http://map.sogou.com/api/documentation/javascript/api2.5/interface_search.html#search_request
+    http://api.go2map.com/engine/api/search/json?encrypt=1&range=bound:12949248.046875,4836823.2421875,12949736.328125,4837409.1796875:0&what=keyword:%25u641C%25u72D0%25u7F51%25u7EDC%25u5927%25u53A6&pageinfo=2,10&from=search&cb=SGS._haemvbd61
+        encrypt : 1
+        range : bound数据   格式为 bound:[数据,度的10000倍]:0
+            ** 貌似只能查公司和餐饮的数据, 查询便利店返回错误
+        what : 查询相关数据 格式为 keyword:[数据]
+        pageinfo : 页码数据 pageNum:pageSize
+        from : search
+        cb : SGS._haemvbd61 好像是返回的变量名 (可以省略,省略后为标准JSON)

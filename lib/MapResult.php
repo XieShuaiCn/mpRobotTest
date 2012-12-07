@@ -1,23 +1,14 @@
 <?php
+require_once("DBAct.php");
 
 class MapResult
 {
-    private static $cachePath = PLACE_CACHE_PATH;
-    
-    private static function getFileName($key)
-    {
-        return self::$cachePath . DIRECTORY_SEPARATOR . $key;
-    }
-    
+    private static $tableName = "PlaceCache";
     
     private static function getData($key)
     {
-        $fileName = self::getFileName($key);
-        if (file_exists($fileName))
-        {
-            return unserialize(file_get_contents($fileName));
-        }
-        return null;
+        $sqlStr = "SELECT * FROM " . self::$tableName . " WHERE InverseKey='{$key}' LIMIT 1";
+        return DBAct::getOne($sqlStr);
     }
     
     
@@ -26,16 +17,33 @@ class MapResult
         return number_format($n, 8, ".", "");
     }
     
-    
-    private static function getImgUrl($llat, $llng, $tlat, $tlng)
+        
+    public static function getImgUrl($llat, $llng, $tlat, $tlng)
     {
+        // http://sobar.soso.com/t/82751256
         $llat = self::formatNum($llat);
         $llng = self::formatNum($llng);
         $tlat = self::formatNum($tlat);
         $tlng = self::formatNum($tlng);
-        $imgUrl = "http://api.map.baidu.com/staticimage?center={$llng},{$llat}&width=400&height=400&zoom=14";
-        $imgUrl .= "&markers={$llng},{$llat}|{$tlng},{$tlat}&markerStyles=m,S,teal|m,T,fuchsia";
+        $imgUrl = "http://st.map.qq.com/staticmap?size=300*300&center={$llng},{$llat}&zoom=15&markers={$llng},{$llat},green|{$tlng},{$tlat},red";
         return $imgUrl;
+    }
+    
+    
+    public static function getResultData($key)
+    {
+        $data = self::getData($key);
+        $text = "";
+        if ($data)
+        {
+            $resultList = unserialize($data["ResultsList"]);
+            $data["ResultsListData"] = $resultList;
+        }
+        else
+        {
+            $data = array();
+        }
+        return $data;
     }
     
     
@@ -46,16 +54,17 @@ class MapResult
         if ($data)
         {
             $textArr = array();
-            $lat = $data["lat"];
-            $lng = $data["lng"];
-            $queryStr = $data["query"];
-            $textArr[] = "# " . $queryStr;
+            $lat = $data["Lat"];
+            $lng = $data["Lng"];
+            $queryStr = $data["QueryStr"];
+            $textArr[] = "# {$queryStr}";
             $textArr[] = "* * *";
-            for ($i=0; $i<count($data["LIST"]); $i++)
+            $resultList = unserialize($data["ResultsList"]);
+            for ($i=0; $i<count($resultList); $i++)
             {
-                $textArr[] = "### " . $data["LIST"][$i]["name"];
-                $textArr[] = "##### " . $data["LIST"][$i]["address"];
-                $textArr[] = "![{$data["LIST"][$i]["name"]}](" . self::getImgUrl($lat, $lng, $data["LIST"][$i]["location"]["lat"], $data["LIST"][$i]["location"]["lng"]) . ")";
+                $textArr[] = "### [{$resultList[$i]["name"]}](javascript:alert(1);)";
+                $textArr[] = "##### {$resultList[$i]["address"]}    ({$resultList[$i]["distance"]}m)";
+                $textArr[] = "![{$resultList[$i]["name"]}](" . self::getImgUrl($lat, $lng, $resultList[$i]["lat"], $resultList[$i]["lng"]) . ")";
             }
             $text =  implode("\r\n", $textArr);
         }
