@@ -1,7 +1,7 @@
 <?php
 require_once("define.php");
 require_once("lib" . DIRECTORY_SEPARATOR . "MapResult.php");
-$resultData = array();
+$resultData = null;
 if (isset($_GET["key"]) && $_GET["key"])
 {
     $resultData = MapResult::getResultData($_GET["key"]);
@@ -19,7 +19,7 @@ if (isset($_GET["key"]) && $_GET["key"])
                 padding:0;
             }
             body {
-                width:300px;
+                width:480px;
                 margin:0 auto;
                 margin-top:15px;
             }
@@ -102,23 +102,25 @@ if (isset($_GET["key"]) && $_GET["key"])
 
     <body>
         <div id="result">
-            <div class="title">
-                <h1><center><?php echo $resultData["QueryStr"]; ?></center></h1>
-                <h4><center><?php echo $resultData["LabelInfo"]; ?></center></h4>
-                <hr />
-            </div>
-            <ol class="list">
-            <?php foreach ($resultData["ResultsListData"] as $val): ?>
-                <li>
-                    <div class="name">
-                        <a href="javascript:;" imgSrc="<?php echo MapResult::getImgUrl($resultData["Lat"], $resultData["Lng"], $val["lat"], $val["lng"]); ?>" onclick="getMapImg(this);"><?php echo $val["name"]; ?></a>
-                        <span>(<?php echo $val["distance"]; ?>m)</span>
-                    </div>
-                    <div class="address"><?php echo $val["address"]; ?></div>
-                    <div class="mapImg"></div>
-                </li>
-            <?php endforeach; ?>
-            </ol>
+            <?php if ($resultData && count($resultData) > 0): ?>
+                <div class="title">
+                    <h1><center><?php echo $resultData["QueryStr"]; ?></center></h1>
+                    <h4><center><?php echo $resultData["LabelInfo"]; ?></center></h4>
+                    <hr />
+                </div>
+                <ol class="list">
+                <?php foreach ($resultData["ResultsListData"] as $val): ?>
+                    <li>
+                        <div class="name">
+                            <a href="javascript:;" imgSrc="<?php echo MapResult::getImgUrl($resultData["Lat"], $resultData["Lng"], $val["lat"], $val["lng"]); ?>" onclick="getMapImg(this);"><?php echo $val["name"]; ?></a>
+                            <span>(<?php echo $val["distance"]; ?>m)</span>
+                        </div>
+                        <div class="address"><?php echo $val["address"]; ?></div>
+                        <div class="mapImg"></div>
+                    </li>
+                <?php endforeach; ?>
+                </ol>
+            <?php endif; ?>
         </div>
     </body>
 </html>

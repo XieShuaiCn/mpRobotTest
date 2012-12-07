@@ -22,27 +22,31 @@ if (isset($GLOBALS["HTTP_RAW_POST_DATA"]))
 }
 else if (isset($_GET["trying"]))
 {
-    $postData = "
-    <xml>
-        <ToUserName><![CDATA[toUser]]></ToUserName>
-        <FromUserName><![CDATA[fromUser]]></FromUserName>
-        <CreateTime>1351776360</CreateTime>
-        <MsgType><![CDATA[location]]></MsgType>
-        <Location_X>31.192055</Location_X>
-        <Location_Y>121.609123</Location_Y>
-        <Scale>20</Scale>
-        <Label><![CDATA[不清楚记录啥]]></Label>
-     </xml> 
-";
-//    $postData = "
-//    <xml>
-//        <ToUserName><![CDATA[toUser]]></ToUserName>
-//        <FromUserName><![CDATA[fromUser]]></FromUserName>
-//        <CreateTime>1348831860</CreateTime>
-//        <MsgType><![CDATA[text]]></MsgType>
-//        <Content>便利店</Content>
-//    </xml> 
-//";
+    if ($_GET["trying"] == "1")
+    {
+        $postData = "
+        <xml>
+            <ToUserName><![CDATA[toUser]]></ToUserName>
+            <FromUserName><![CDATA[fromUser]]></FromUserName>
+            <CreateTime>1351776360</CreateTime>
+            <MsgType><![CDATA[location]]></MsgType>
+            <Location_X>31.192055</Location_X>
+            <Location_Y>121.609123</Location_Y>
+            <Scale>20</Scale>
+            <Label><![CDATA[不清楚记录啥]]></Label>
+         </xml>";
+    }
+    else if ($_GET["trying"] == "0")
+    {
+        $postData = "
+        <xml>
+            <ToUserName><![CDATA[toUser]]></ToUserName>
+            <FromUserName><![CDATA[fromUser]]></FromUserName>
+            <CreateTime>1348831860</CreateTime>
+            <MsgType><![CDATA[text]]></MsgType>
+            <Content>便利店</Content>
+        </xml>";
+    }
 }
 
 

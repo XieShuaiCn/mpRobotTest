@@ -25,7 +25,7 @@ class MapResult
         $llng = self::formatNum($llng);
         $tlat = self::formatNum($tlat);
         $tlng = self::formatNum($tlng);
-        $imgUrl = "http://st.map.qq.com/staticmap?size=300*300&center={$llng},{$llat}&zoom=15&markers={$llng},{$llat},green|{$tlng},{$tlat},red";
+        $imgUrl = "http://st.map.qq.com/staticmap?size=480*480&center={$llng},{$llat}&zoom=15&markers={$llng},{$llat},green|{$tlng},{$tlat},red";
         return $imgUrl;
     }
     
@@ -33,15 +33,10 @@ class MapResult
     public static function getResultData($key)
     {
         $data = self::getData($key);
-        $text = "";
         if ($data)
         {
             $resultList = unserialize($data["ResultsList"]);
             $data["ResultsListData"] = $resultList;
-        }
-        else
-        {
-            $data = array();
         }
         return $data;
     }
