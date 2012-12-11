@@ -64,7 +64,7 @@ class Reply
     }
     
     
-    private function replyLocationType(SimpleXMLElement $reqObj, $toUserName, $query="")
+    private function replyLocationType(SimpleXMLElement $reqObj, $toUserName)
     {
         $lat = (float)$reqObj->Location_X;
         $lng = (float)$reqObj->Location_Y;
