@@ -51,15 +51,20 @@ class SoSoPlaceQuery extends PlaceQuery
         {
             foreach ($resultJson["detail"]["pois"] as $data)
             {
-                $retArr[] = array(
-                    "name" => $data["name"],
-                    "phone" => $data["phone"],
-                    "address" => $data["addr"],
-                    "zip" => $data["zip"],
-                    "lat" => $data["pointy"],
-                    "lng" => $data["pointx"],
-                    "distance" => $this->getDistance($lat, $lng, $data["pointy"], $data["pointx"]),
-                );
+                $distance = $this->getDistance($lat, $lng, $data["pointy"], $data["pointx"]);
+                // 排除 soso 搜索的错误
+                if ($distance <= PLACE_QUERY_RANGE)
+                {
+                    $retArr[] = array(
+                        "name" => $data["name"],
+                        "phone" => $data["phone"],
+                        "address" => $data["addr"],
+                        "zip" => $data["zip"],
+                        "lat" => $data["pointy"],
+                        "lng" => $data["pointx"],
+                        "distance" => $this->getDistance($lat, $lng, $data["pointy"], $data["pointx"]),
+                    );
+                }
             }
         }
         return $retArr;
