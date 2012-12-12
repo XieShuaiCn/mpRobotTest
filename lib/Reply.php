@@ -10,6 +10,10 @@ class Reply
      * @var PlaceQuery 
      */
     private $placeQuery = null;
+    /**
+     * @var UserCache
+     */
+    private $userCache = null;
     
     public function __construct()
     {
@@ -27,6 +31,7 @@ class Reply
             $msgType = strtolower((string)$reqObj->MsgType);
             $this->myUserName = (string)$reqObj->ToUserName;
             $toUserName = (string)$reqObj->FromUserName;
+            $this->userCache = new UserCache($toUserName);
             if ($msgType == "text")
             {
                 return $this->replyTextType($reqObj, $toUserName);
@@ -49,6 +54,39 @@ class Reply
     }
     
     
+    private function getPlaceResult($lat, $lng, $query, $label)
+    {
+        // 实现逻辑
+        $data = $this->placeQuery->getResults($lat, $lng, $query, $label);
+        $iKey = $this->placeQuery->getInverseKey($lat, $lng, $query);
+        $retTextArr = array();
+        $retTextArr[] = "{$label} 搜索周边 {$query} 共找到有［" . count($data) . "］个结果";
+        $retTextArr[] = "";
+        for ($i=0; $i<count($data); $i++)
+        {
+            if ($i >= 12)
+            {
+                break;
+            }
+
+            $retTextArr[] = "  - {$data[$i]["name"]}  ({$data[$i]["distance"]}m)";
+        }
+        $retTextArr[] = "";
+        if (count($data) > 0)
+        {
+            $retTextArr[] .= "  ** 列出的是直线距离, 现只能计算直线距离...";
+            // link
+            $retTextArr[] = "http://" . BASE_URL . "/mpRobotTest/MAP{$iKey}";
+        }
+        else
+        {
+            $retTextArr[] .= " 抱歉，喵认为您的关键词 {$query} 不行～ 完全不行啊！";
+        }
+        $retText = implode("\r\n", $retTextArr);
+        return $retText;
+    }
+    
+    
     private function replyImageType(SimpleXMLElement $reqObj, $toUserName)
     {
         $picUrl = (string)$reqObj->PicUrl;
@@ -58,9 +96,29 @@ class Reply
     
     private function replyTextType(SimpleXMLElement $reqObj, $toUserName)
     {
-        $msgContent = strip_tags((string)$reqObj->Content);
-        UserCache::simpleAddTalk($toUserName, $msgContent);
-        return $this->buildTextData($toUserName, "您查询的关键词为:{$msgContent},请输入地址信息,返回结果.");
+        $msgContent = trim(strip_tags((string)$reqObj->Content));
+        $outputContent = "";
+        if (empty($msgContent))
+        {
+            $outputContent = $this->buildTextData($toUserName, "抱歉，关键词为空，喵无法记录！");
+        }
+        else
+        {
+            $lastPositionData = $this->userCache->getLastQueryPosition();
+            $this->userCache->addNewQuery(UserCache::QUERY_TYPE_KEYWORD, $msgContent);
+            if ($lastPositionData)
+            {
+                $lat = $lastPositionData["lat"];
+                $lng = $lastPositionData["lng"];
+                $label = $lastPositionData["label"];
+                $outputContent = $this->getPlaceResult($lat, $lng, $msgContent, $label);
+            }
+            else
+            {
+                $outputContent = $this->buildTextData($toUserName, "请通过给微信客户端给喵我您当前的地理位置，请使用输入框左边的“加号”，传送位置信息给喵哦…… 您的地理位置将有" . UserCache::QUERY_POSITION_EXP . "分钟的有效期……");
+            }
+        }
+        return $this->buildTextData($toUserName, $outputContent);
     }
     
     
@@ -70,35 +128,22 @@ class Reply
         $lng = (float)$reqObj->Location_Y;
         $label = (string)$reqObj->Label;
         //$scale = (int)$reqObj->Scale;       // 缩放大小
-        $query = UserCache::simpleGetLastTalk($toUserName);
+        $query = $this->userCache->getLastQueryKeyword();
+        $this->userCache->addNewQuery(UserCache::QUERY_TYPE_POSITION, array(
+                                                                            "lat" => $lat,
+                                                                            "lng" => $lng,
+                                                                            "label" => $label,
+                                                                        ));
+        $outputContent = "";
         if ($query)
         {
-            // 实现逻辑
-            $data = $this->placeQuery->getResults($lat, $lng, $query, $label);
-            $iKey = $this->placeQuery->getInverseKey($lat, $lng, $query);
-            $retTextArr = array();
-            $retTextArr[] = "{$query} 本次搜索共找到 " . count($data) . " 个结果";
-            $retTextArr[] = "";
-            for ($i=0; $i<count($data); $i++)
-            {
-                if ($i >= 12)
-                {
-                    break;
-                }
-                
-                $retTextArr[] = "  - {$data[$i]["name"]}  ({$data[$i]["distance"]}m)";
-            }
-            $retTextArr[] = "";
-            $retTextArr[] .= "  ** 列出的是直线距离, 现只能计算直线距离...";
-            // link
-            $retTextArr[] = "http://113.11.199.202/test/mpRobotTest/MAP{$iKey}";
-            $retText = implode("\r\n", $retTextArr);
-            return $this->buildTextData($toUserName, $retText);
+            $outputContent = $this->getPlaceResult($lat, $lng, $query, $label);
         }
         else
         {
-            return $this->buildTextData($toUserName, "请给我一条文本消息作为查询关键词!");
+            $outputContent = $this->buildTextData($toUserName, "请告诉喵，您需要查询的周边的关键词，您的关键词喵将为您保持" . UserCache::QUERY_KEYWORD_EXP . "分钟的有效期哦～");
         }
+        return $this->buildTextData($toUserName, $outputContent);
     }
     
     
@@ -111,12 +156,12 @@ class Reply
     }
     
     
-    private function buildImageData()
-    {
+//    private function buildImageData()
+//    {
 //        $dom = new DOMDocument();
 //        $root = $dom->createElement("xml");
 //        $dom->appendChild($root);
-    }
+//    }
     
     
     private function buildTextData($toUserName, $content)

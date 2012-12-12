@@ -44,7 +44,7 @@ else if (isset($_GET["trying"]))
             <FromUserName><![CDATA[fromUser]]></FromUserName>
             <CreateTime>1348831860</CreateTime>
             <MsgType><![CDATA[text]]></MsgType>
-            <Content>便利店</Content>
+            <Content>科技</Content>
         </xml>";
     }
 }
@@ -53,6 +53,7 @@ else if (isset($_GET["trying"]))
 // Robot
 if ($postData)
 {
+    header("Content-Type: text/xml");
     $reply = new Reply();
     $retConnect = $reply->responseMsg($postData);
     echo $retConnect;

@@ -3,50 +3,67 @@ require_once("DBAct.php");
 
 class UserCache
 {
+    const QUERY_TYPE_KEYWORD = "KEYWORD";
+    const QUERY_TYPE_POSITION = "POSITION";
+    
+    const QUERY_KEYWORD_EXP = 5;
+    const QUERY_POSITION_EXP = 20;
+    
     private $tableName = "UserCache";
     private $userKey = "";
-    
-    private function __construct($userKey)
+
+
+    public function __construct($userKey)
     {
         $this->userKey = $userKey;
     }
     
     
-    private function addTalk($content)
+    public function addNewQuery($type, $data)
     {
-        $content = DBAct::escapeString($content);
+        $type = strtoupper($type);
+        if ($type == self::QUERY_TYPE_POSITION)
+        {
+            $data = json_encode($data);
+        }
+        else
+        {
+            $type = self::QUERY_TYPE_KEYWORD;
+        }
         $nowStr = date("Y-m-d H:i:s");
-        $sqlStr = "INSERT INTO {$this->tableName}(UserKey, QueryStr, QueryTime)
-                        VALUES('{$this->userKey}', '{$content}', '{$nowStr}')";
+        $data = DBAct::escapeString($data);
+        $sqlStr = "INSERT INTO {$this->tableName}(UserKey, QueryType, QueryData, QueryTime)
+                        VALUES('{$this->userKey}', '{$type}', '{$data}', '{$nowStr}')";
         return DBAct::execute($sqlStr);
     }
     
     
-    private function getLastTalk()
+    public function getLastQueryKeyword()
     {
-        $sqlStr = "SELECT QueryStr FROM {$this->tableName} WHERE UserKey='{$this->userKey}' ORDER BY ID DESC LIMIT 1";
+        $expTime = date("Y-m-d H:i:s", time() - self::QUERY_KEYWORD_EXP * 60);
+        $sqlStr = "SELECT QueryData FROM {$this->tableName} 
+                        WHERE UserKey='{$this->userKey}' AND QueryType='KEYWORD' AND QueryTime>='{$expTime}'
+                        ORDER BY ID DESC LIMIT 1";
         $results = DBAct::getOne($sqlStr);
         if ($results)
         {
-            return $results["QueryStr"];
+            return $results["QueryData"];
         }
-        return "";
+        return null;
     }
     
     
-    public static function simpleAddTalk($user, $content)
+    public function getLastQueryPosition()
     {
-        $o = new UserCache($user);
-        $o->addTalk($content);
-        unset($o);
-    }
-    
-    
-    public static function simpleGetLastTalk($user)
-    {
-        $o = new UserCache($user);
-        $content = $o->getLastTalk();
-        unset($o);
-        return $content;
+        $expTime = date("Y-m-d H:i:s", time() - self::QUERY_POSITION_EXP * 60);
+        $sqlStr = "SELECT QueryData FROM {$this->tableName} 
+                        WHERE UserKey='{$this->userKey}' AND QueryType='POSITION' AND QueryTime>='{$expTime}'
+                        ORDER BY ID DESC LIMIT 1";
+        $results = DBAct::getOne($sqlStr);
+        if ($results)
+        {
+            return json_decode($results["QueryData"], true);
+        }
+        return null;
     }
 }
