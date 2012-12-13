@@ -65,10 +65,9 @@ if (isset($_GET["key"]) && $_GET["key"])
             <div data-role="footer">
                 <h4><?php echo $resultData["LabelInfo"]; ?></h4>
             </div><!-- /footer -->
-            
-            <?php endif; ?>
-        
+
         </div><!-- /page -->
+        <?php endif; ?>
         
     </body>
 </html>
