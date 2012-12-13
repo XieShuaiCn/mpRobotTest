@@ -57,7 +57,7 @@ if ($postData)
     $retConnect = $reply->responseMsg($postData);
     if ($retConnect)
     {
-        //header("Content-Type: text/xml");
+        header("Content-Type: text/xml");
         echo $retConnect;
     }
 }
