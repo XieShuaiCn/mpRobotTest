@@ -1,5 +1,7 @@
 <?php
 
+require_once("HttpClient.php");
+
 abstract class PlaceQuery
 {
     // 一度变化, 北京  85.567KM http://zhidao.baidu.com/question/2153234.html
@@ -40,11 +42,32 @@ abstract class PlaceQuery
     }
     
     
+    protected function getHttpResponse($host, $uri)
+    {
+        $client = new HttpClient($host);
+        $content = null;
+        for ($i=0; $i<API_TRY_TIMES; $i++)
+        {
+            try
+            {
+                $content = $client->getUploadString($uri);
+                break;
+            }
+            catch (Exception $e)
+            {
+                
+            }
+        }
+        unset($client);
+        return $content;
+    }
+    
+    
     protected function poi2City($lat, $lng)
     {
         // http://api.map.baidu.com/geocoder?location=纬度,经度&output=输出格式类型&key=用户密钥
-        $url = "http://api.map.baidu.com/geocoder?output=json&location={$lat},{$lng}&key=" . BAIDU_API_KEY;
-        $resultStr = file_get_contents($url);
+        $uri = "/geocoder?output=json&location={$lat},{$lng}&key=" . BAIDU_API_KEY;
+        $resultStr = $this->getHttpResponse("api.map.baidu.com", $uri);
         $resultJson = json_decode($resultStr, true);
         if ($resultJson && $resultJson["status"] == "OK")
         {
@@ -62,7 +85,10 @@ abstract class PlaceQuery
     }
     
     
-    protected abstract function getQueryUrl($lat, $lng, $query);
+    /**
+     * @return array[host, uri, url]
+     */
+    protected abstract function getQueryUriData($lat, $lng, $query);
     
     
     public function getDistance($lat1, $lng1, $lat2, $lng2)
@@ -78,12 +104,12 @@ abstract class PlaceQuery
         $apiType = $this->getApiType();
         $this->clearCache($lat, $lng, $this->range, $query);
         $dataSec = DBAct::escapeString(serialize($data));
-        $url = $this->getQueryUrl($lat, $lng, $query);
+        $uriData = $this->getQueryUriData($lat, $lng, $query);
         $nowStr = date("Y-m-d H:i:s");
         $inverseKey = $this->getInverseKey($lat, $lng, $query);
         $label = DBAct::escapeString($label);
         $sqlStr = "INSERT INTO {$this->tableName}(Lat, Lng, Range, QueryStr, ApiType, RequestURL, ResultsList, CreateTime, InverseKey, LabelInfo)
-                        VALUES('{$lat}', '{$lng}', '{$this->range}', '{$query}', '{$apiType}', '{$url}', '{$dataSec}', '{$nowStr}', '{$inverseKey}', '{$label}')";
+                        VALUES('{$lat}', '{$lng}', '{$this->range}', '{$query}', '{$apiType}', '{$uriData["url"]}', '{$dataSec}', '{$nowStr}', '{$inverseKey}', '{$label}')";
         return DBAct::execute($sqlStr);
     }
         

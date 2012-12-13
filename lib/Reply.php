@@ -98,9 +98,14 @@ class Reply
     {
         $msgContent = trim(strip_tags((string)$reqObj->Content));
         $outputContent = "";
+        $exCludeReg = "/^Hello2BizUser$/i";
         if (empty($msgContent))
         {
             $outputContent = $this->buildTextData($toUserName, "抱歉，关键词为空，喵无法记录！");
+        }
+        else if (preg_match($exCludeReg, $msgContent))
+        {
+            $outputContent = null;
         }
         else
         {
@@ -115,10 +120,14 @@ class Reply
             }
             else
             {
-                $outputContent = $this->buildTextData($toUserName, "请通过给微信客户端给喵我您当前的地理位置，请使用输入框左边的“加号”，传送位置信息给喵哦…… 您的地理位置将有" . UserCache::QUERY_POSITION_EXP . "分钟的有效期……");
+                $outputContent = $this->buildTextData($toUserName, "喵已经记录了您的{$msgContent}查询，麻烦请通过给微信客户端给喵我您当前的地理位置，请使用输入框左边的“加号”，传送位置信息给喵哦…… 您的地理位置将有" . UserCache::QUERY_POSITION_EXP . "分钟的有效期……");
             }
         }
-        return $this->buildTextData($toUserName, $outputContent);
+        if ($outputContent)
+        {
+            return $this->buildTextData($toUserName, $outputContent);
+        }
+        return null;
     }
     
     
@@ -141,7 +150,7 @@ class Reply
         }
         else
         {
-            $outputContent = $this->buildTextData($toUserName, "请告诉喵，您需要查询的周边的关键词，您的关键词喵将为您保持" . UserCache::QUERY_KEYWORD_EXP . "分钟的有效期哦～");
+            $outputContent = $this->buildTextData($toUserName, "喵明白您想查询{$label}周边的信息，但喵还不清楚您具体想查询啥？麻烦请告知喵您的关键词。的关键词喵将为您保持" . UserCache::QUERY_KEYWORD_EXP . "分钟的有效期哦～");
         }
         return $this->buildTextData($toUserName, $outputContent);
     }
